@@ -1,0 +1,58 @@
+# Akash Network deployment configuration for C3 Alliance
+# Deploy to decentralized cloud infrastructure
+
+version: "2.0"
+
+services:
+  c3-alliance:
+    # Docker image - you'll need to build and push to a public registry
+    image: your-registry/c3-alliance:latest
+    env:
+      - NODE_ENV=production
+      - PORT=5000
+      # Environment variables for production deployment
+      # Set these in your Akash Console deployment
+      - DATABASE_URL
+      - SESSION_SECRET
+    expose:
+      - port: 5000
+        as: 80
+        proto: tcp
+        to:
+          - global: true
+    # Health check configuration
+    params:
+      storage:
+        data:
+          mount: /app/data
+          readOnly: false
+
+profiles:
+  compute:
+    c3-alliance:
+      resources:
+        cpu:
+          units: "1000m"  # 1 CPU core
+        memory:
+          size: "2Gi"     # 2GB RAM
+        storage:
+          - size: "10Gi"  # 10GB storage
+            name: data
+
+  placement:
+    dcloud:
+      attributes:
+        host: akash
+      signedBy:
+        anyOf:
+          - "akash1365yvmc4s7awdyj3n2sav7xfx76adc6dnmlx63"
+      pricing:
+        c3-alliance:
+          denom: uakt
+          amount: 1000
+
+deployment:
+  c3-alliance:
+    dcloud:
+      profile: c3-alliance
+      count: 1
